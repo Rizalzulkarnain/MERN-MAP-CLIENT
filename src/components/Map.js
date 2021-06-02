@@ -17,20 +17,21 @@ const fetchPinMap = async () => {
 };
 
 const Map = () => {
+  const [currentPlaceId, setCurrentPlaceId] = useState('');
+  const [newPlace, setNewPlace] = useState('');
+  const [viewport, setViewport] = useState({
+    width: '100vw',
+    height: '100vh',
+    latitude: -6.175392,
+    longitude: 106.827153,
+    zoom: 14,
+  });
+
   const myStorage = window.localStorage;
   const [currentUser, setCurrentUser] = useState(
     myStorage.getItem('user') || null
   );
   const { isLoading, data } = useQuery('PinMap', fetchPinMap);
-  const [currentPlaceId, setCurrentPlaceId] = useState(null);
-  const [newPlace, setNewPlace] = useState(null);
-  const [viewport, setViewport] = useState({
-    width: '100vw',
-    height: '100vh',
-    latitude: 46,
-    longitude: 17,
-    zoom: 5,
-  });
 
   const [pins, setPins] = useState([]);
   const [title, setTitle] = useState('');
