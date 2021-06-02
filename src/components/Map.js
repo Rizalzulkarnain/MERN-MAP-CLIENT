@@ -31,7 +31,7 @@ const Map = () => {
   const [currentUser, setCurrentUser] = useState(
     myStorage.getItem('user') || null
   );
-  const { isLoading, data } = useQuery('PinMap', fetchPinMap);
+  const { data } = useQuery('PinMap', fetchPinMap);
 
   const [pins, setPins] = useState([]);
   const [title, setTitle] = useState('');
@@ -88,95 +88,88 @@ const Map = () => {
         onDblClick={handleClickAdd}
         transitionDuration="1000"
       >
-        {isLoading ? (
-          <div style={{ textAlign: 'center' }}>
-            <h1>Loading</h1>
-          </div>
-        ) : (
-          data.map((pin) => (
-            <div key={pin._id}>
-              <Marker
+        {data.map((pin) => (
+          <div key={pin._id}>
+            <Marker
+              latitude={pin.lat}
+              longitude={pin.long}
+              offsetLeft={viewport.zoom * 3.5}
+              offsetTop={viewport.zoom * 7}
+            >
+              <Room
+                style={{
+                  fontSize: viewport.zoom * 7,
+                  color: pin.username === currentUser ? 'tomato' : 'slateblue',
+                  cursor: 'pointer',
+                }}
+                onClick={() => handleClickMarker(pin._id, pin.lat, pin.long)}
+              />
+            </Marker>
+            {pin._id === currentPlaceId && (
+              <Popup
                 latitude={pin.lat}
                 longitude={pin.long}
-                offsetLeft={viewport.zoom * 3.5}
-                offsetTop={viewport.zoom * 7}
+                closeButton={true}
+                closeOnClick={false}
+                anchor="left"
+                onClose={() => setCurrentPlaceId(null)}
               >
-                <Room
-                  style={{
-                    fontSize: viewport.zoom * 7,
-                    color:
-                      pin.username === currentUser ? 'tomato' : 'slateblue',
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => handleClickMarker(pin._id, pin.lat, pin.long)}
-                />
-              </Marker>
-              {pin._id === currentPlaceId && (
-                <Popup
-                  latitude={pin.lat}
-                  longitude={pin.long}
-                  closeButton={true}
-                  closeOnClick={false}
-                  anchor="left"
-                  onClose={() => setCurrentPlaceId(null)}
-                >
-                  <div className="card">
-                    <label>Place</label>
-                    <h4 className="place">{pin.title}</h4>
+                <div className="card">
+                  <label>Place</label>
+                  <h4 className="place">{pin.title}</h4>
+                  <label>Review</label>
+                  <p className="desc">{pin.desc}</p>
+                  <label>Rating</label>
+                  <div className="stars">
+                    {Array(pin.rating).fill(<Star className="star " />)}
+                  </div>
+                  <label>Information</label>
+                  <span className="username">
+                    Created by <b>{pin.username}</b>
+                  </span>
+                  <span className="date">{format(pin.createdAt)}</span>
+                </div>
+              </Popup>
+            )}
+            {newPlace && (
+              <Popup
+                latitude={newPlace.lat}
+                longitude={newPlace.long}
+                closeButton={true}
+                closeOnClick={false}
+                anchor="left"
+                onClose={() => setNewPlace(null)}
+              >
+                <div>
+                  <form onSubmit={handleSubmit}>
+                    <label>Title</label>
+                    <input
+                      type="text"
+                      placeholder="Enter a title"
+                      onChange={(e) => setTitle(e.target.value)}
+                    />
                     <label>Review</label>
-                    <p className="desc">{pin.desc}</p>
+                    <textarea
+                      placeholder="Description about Place"
+                      onChange={(e) => setDesc(e.target.value)}
+                    />
                     <label>Rating</label>
-                    <div className="stars">
-                      {Array(pin.rating).fill(<Star className="star " />)}
-                    </div>
-                    <label>Information</label>
-                    <span className="username">
-                      Created by <b>{pin.username}</b>
-                    </span>
-                    <span className="date">{format(pin.createdAt)}</span>
-                  </div>
-                </Popup>
-              )}
-              {newPlace && (
-                <Popup
-                  latitude={newPlace.lat}
-                  longitude={newPlace.long}
-                  closeButton={true}
-                  closeOnClick={false}
-                  anchor="left"
-                  onClose={() => setNewPlace(null)}
-                >
-                  <div>
-                    <form onSubmit={handleSubmit}>
-                      <label>Title</label>
-                      <input
-                        type="text"
-                        placeholder="Enter a title"
-                        onChange={(e) => setTitle(e.target.value)}
-                      />
-                      <label>Review</label>
-                      <textarea
-                        placeholder="Description about Place"
-                        onChange={(e) => setDesc(e.target.value)}
-                      />
-                      <label>Rating</label>
-                      <select onChange={(e) => setRating(e.target.value)}>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                      </select>
-                      <button className="submitButton" ttype="submit">
-                        Add Pin
-                      </button>
-                    </form>
-                  </div>
-                </Popup>
-              )}
-            </div>
-          ))
-        )}
+                    <select onChange={(e) => setRating(e.target.value)}>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                    </select>
+                    <button className="submitButton" ttype="submit">
+                      Add Pin
+                    </button>
+                  </form>
+                </div>
+              </Popup>
+            )}
+          </div>
+        ))}
 
         {currentUser ? (
           <button className="button logout" onClick={handleLogout}>
